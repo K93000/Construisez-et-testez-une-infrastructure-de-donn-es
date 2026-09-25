@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Données brutes ingérées par Airbyte, non transformées"
+    schema: public
+    tables:
+      - name: infoclimat
+        description: "Relevés horaires des stations InfoClimat (Bergues, Hazebrouck, Armentières, Lille-Lesquin), JSON complet dans la colonne data"
+
+      - name: weather_underground_ichtegem
+        description: "Relevés ~5 min de la station amateur Weather Underground IICHTE19 (Ichtegem, BE)"
+
+      - name: weather_underground_la_madeleine
+        description: "Relevés ~5 min de la station amateur Weather Underground ILAMAD25 (La Madeleine, FR)"

@@ -1,31 +1,42 @@
 services:
-
   postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: forecast2_postgres
     restart: unless-stopped
-
     environment:
-      POSTGRES_USER: airbyte
-      POSTGRES_PASSWORD: airbyte
-      POSTGRES_DB: weather
-
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
-
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-
-  airbyte:
-    image: airbyte/airbyte:latest
-    container_name: airbyte
-
+  # Transformations dbt (même image que celle déployée sur ECS)
+  dbt:
+    build: ./forecast2_dbt
+    container_name: forecast2_dbt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    environment:
+      DBT_HOST: postgres
+      DBT_PORT: 5432
+      DBT_USER: ${POSTGRES_USER}
+      DBT_PASSWORD: ${POSTGRES_PASSWORD}
+      DBT_DBNAME: ${POSTGRES_DB}
+      DBT_SSLMODE: disable
+    command: ["build"]
+    restart: "no"
 
-    ports:
-      - "8000:8000"
+  # Airbyte : conteneurisé via abctl (méthode officielle depuis la v1.0),
+  # qui déploie ses propres conteneurs Docker. Il n'est plus distribué
+  # sous forme de docker-compose. Voir README.
 
 volumes:
   postgres_data:

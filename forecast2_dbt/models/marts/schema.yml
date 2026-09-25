@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: dim_weather_stations
+    description: "Dimension des stations météo (4 InfoClimat + 2 Weather Underground amateurs)"
+    columns:
+      - name: station_key
+        description: "Clé de substitution (PK)"
+        tests:
+          - unique
+          - not_null
+      - name: station_id
+        description: "Identifiant métier de la station"
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    description: "Dimension calendaire couvrant la période des relevés"
+    columns:
+      - name: date_key
+        tests:
+          - unique
+          - not_null
+      - name: full_date
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_weather_observations
+    description: "Table de faits : un relevé météo par ligne, InfoClimat et Weather Underground unifiés"
+    columns:
+      - name: observation_key
+        tests:
+          - unique
+          - not_null
+      - name: station_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_weather_stations')
+                field: station_key
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key

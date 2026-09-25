@@ -1,0 +1,13 @@
+target/
+dbt_packages/
+logs/
+.user.yml
+.env
+*.env
+*.pem
+*.ppk
+abctl*
+*_dump.sql
+venv/
+.venv/
+__pycache__/
